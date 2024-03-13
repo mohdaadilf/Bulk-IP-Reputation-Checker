@@ -1,12 +1,15 @@
 # Bulk IP Reputation Checker
 
-This Python script aims to bulk check IPs reputation using multiple tools, currently focusing on VirusTotal. The script utilizes the VirusTotal API to fetch information about the provided IP addresses. For more information on the VirusTotal API, please refer to the [official documentation](https://docs.virustotal.com/reference/overview).
+This Python script aims to bulk check IPs reputation using multiple tools, currently focusing on VirusTotal. 
+The script utilizes the VirusTotal API to fetch information about the provided IP addresses. 
+For more information on the VirusTotal API, please refer to the 
+[official documentation](https://docs.virustotal.com/reference/overview).  
+Other tools will have be introduced for cross-checking as well as to make sure API Quota (For VT currently) doesn't expire.
 
 ### Prerequisites
 
 1. Ensure you have a separate Python file named `credentials.py`, where you need to supply your VirusTotal(VT) API key. Define the API key variable as `api` within this file (`vtapi`).
-[Go to the VT and login to get your API key](https://www.virustotal.com/gui/my-apikey)
-
+[Go to the VT and login to get your API key](https://www.virustotal.com/gui/my-apikey)  
 2. Python 3.10 or later is required to use the `truststore` package.
 
 ### Disclaimer

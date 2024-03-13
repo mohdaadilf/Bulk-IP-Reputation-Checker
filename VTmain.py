@@ -1,7 +1,6 @@
 import json
 import truststore
 import requests
-import os
 import ipaddress
 from credentials import vtapi
 
@@ -21,6 +20,8 @@ with open("ips.txt") as f:
 
 ips = [x.strip() for x in ips]  # remove new line char
 print(ips)  # to show the ips
+
+# to do - check if 1. IP is Valid and 2. If IP is Priv/Public
 
 for ip in ips:
     url = f"https://www.virustotal.com/api/v3/ip_addresses/{ip}"
