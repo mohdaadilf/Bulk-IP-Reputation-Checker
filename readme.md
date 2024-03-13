@@ -8,8 +8,9 @@ Other tools will have be introduced for cross-checking as well as to make sure A
 
 ### Prerequisites
 
-1. Ensure you have a separate Python file named `credentials.py`, where you need to supply your VirusTotal(VT) API key. Define the API key variable as `api` within this file (`vtapi`).
-[Go to the VT and login to get your API key](https://www.virustotal.com/gui/my-apikey)  
+1. Ensure you have a separate Python file named `credentials.py`, where you need to supply your VirusTotal (VT) API key.
+Define the API key variable as `vtapi` within this file.  
+[Go to VT and login to get your API key](https://www.virustotal.com/gui/my-apikey)  
 2. Python 3.10 or later is required to use the `truststore` package.
 
 ### Disclaimer
@@ -19,7 +20,7 @@ I am not responsible for any misuse of this script or its results. Use it respon
 ### Usage
 
 1. Ensure Python 3.10 or later is installed.
-2. Provide your VirusTotal API key in the `credentials.py` file.
+2. Provide your (VirusTotal) API key in the `credentials.py` file.
 3. Run the script by executing `python VTmain.py` in your terminal.
 
 ### Additional Notes
