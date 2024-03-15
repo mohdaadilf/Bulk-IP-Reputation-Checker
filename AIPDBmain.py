@@ -1,6 +1,5 @@
-from credentials import vtapi
+from credentials import aipdbapi
 from common import *
-
 
 for ip in ips:
     try:
@@ -12,23 +11,33 @@ for ip in ips:
 
     if not address.is_private:
         try:
-            url = f"https://www.virustotal.com/api/v3/ip_addresses/{ip}"
-            headers = {
-                "accept": "application/json",
-                "x-apikey": vtapi
+            days = 90
+            url = 'https://api.abuseipdb.com/api/v2/check'
+            querystring = {
+                'ipAddress': ip,
+                'maxAgeInDays': days
             }
-            response = requests.get(url, headers=headers, timeout=5)
+            headers = {
+                'Accept': 'application/json',
+                'Key': aipdbapi
+            }
+
+            response = requests.request(method='GET', url=url, headers=headers, params=querystring)
             response.raise_for_status()
             print(f"{response} for {ip}")
-
+            # Formatted output
             resp = json.loads(response.text)
-            ip = resp["data"]["id"]
-            link = resp["data"]["links"]["self"]
-            tags = resp["data"]["attributes"]["tags"]
-            res = resp["data"]["attributes"]["last_analysis_stats"]
-            if resp["data"]["attributes"]["last_analysis_stats"]["malicious"] > 2:
+            # print(f'{json.dumps(resp, indent=4)}')
+            ip = resp["data"]["ipAddress"]
+            link = f"https://abuseipdb.com/check/{ip}"
+            istor = resp["data"]["isTor"]
+            res = resp["data"]["abuseConfidenceScore"]
+            tr = resp["data"]["totalReports"]
+            ndu = resp["data"]["numDistinctUsers"]
+            if res > 25:
                 print(f'{Style.RED_Highlighted}{res}{Style.RESET}')
-            temp = {'ip': ip, 'link': link, 'tags': tags, 'res': res}
+            temp = {'ip': ip, 'link': link, 'isTor': istor, 'abuseConfidenceScore': res, 'totalReports': tr,
+                    'numDistinctUsers': ndu}
             all_ips.append(temp)
             # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
             # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
@@ -45,14 +54,14 @@ for ip in ips:
     else:
         print(f"{Style.RED_Highlighted}Something gone terribly wrong. This line should never run{Style.RESET}")
 
-sorted_ips = sorted(all_ips, key=lambda x: (x["res"]["malicious"], x["res"]["suspicious"]), reverse=True)  # sort using
+sorted_ips = sorted(all_ips, key=lambda x: (x['abuseConfidenceScore']), reverse=True)  # sort using
 # malicious tag then suspicious tag
 for i, result in enumerate(sorted_ips):
-    if result['res']['malicious'] > 5:
+    if result['abuseConfidenceScore'] > 25:
         print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
-    elif result['res']['malicious'] > 2 or result['res']['suspicious'] > 1:
+    elif result['abuseConfidenceScore'] > 10:
         print(f"{Style.RED} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
-    elif result['res']['malicious'] > 0 or result['res']['suspicious'] > 0:
+    elif result['abuseConfidenceScore'] > 2:
         print(f"{Style.YELLOW} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
     else:
         print(f"{Style.GREEN} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")

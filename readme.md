@@ -1,4 +1,4 @@
-# Bulk IP Reputation Checker
+# Bulk IP Reputation Lookup
 
 This Python script aims to bulk check IPs reputation using multiple tools, currently focusing on VirusTotal. 
 The script utilizes the VirusTotal API to fetch information about the provided IP addresses. 
