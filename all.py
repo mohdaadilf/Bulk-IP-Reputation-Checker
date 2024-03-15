@@ -34,9 +34,7 @@ for i, ip in enumerate(ips):
             res_aipdb = resp["data"]["abuseConfidenceScore"]
             tr_aipdb = resp["data"]["totalReports"]
             ndu_aipdb = resp["data"]["numDistinctUsers"]
-            if res_aipdb > 25:
-                print(f'{Style.RED_Highlighted}{res_aipdb}{Style.RESET}')
-            temp = {'ip': ip_aipdb, 'abuseConfidenceScore': res_aipdb}
+            temp = {'ip': ip_aipdb, 'abuseConfidenceScore': res_aipdb, 'isTor': istor_aipdb}
             all_ips.append(temp)
             # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
             # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
@@ -65,8 +63,6 @@ for i, ip in enumerate(ips):
             link_vt = resp_vt["data"]["links"]["self"]
             tags_vt = resp_vt["data"]["attributes"]["tags"]
             res_vt = resp_vt["data"]["attributes"]["last_analysis_stats"]
-            if resp_vt["data"]["attributes"]["last_analysis_stats"]["malicious"] > 2:
-                print(f'{Style.RED_Highlighted}{res_vt}{Style.RESET}')
             # temp = {'ip': ip_vt, 'link': link_vt, 'tags': tags_vt, 'res': res_vt}
             all_ips[i].update({'Res': res_vt})
             # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
@@ -84,18 +80,17 @@ for i, ip in enumerate(ips):
     else:
         print(f"{Style.RED_Highlighted}Something gone terribly wrong. This line should never run{Style.RESET}")
 
-print(json.dumps(all_ips, indent=3))
+# print(json.dumps(all_ips, indent=3))
 
-'''
-sorted_ips = sorted(all_ips, key=lambda x: (x['abuseConfidenceScore']), reverse=True)  # sort using
-# malicious tag then suspicious tag
+sorted_ips = sorted(all_ips, key=lambda x: (x["Res"]["malicious"], x['abuseConfidenceScore'], x["Res"]["suspicious"]),
+                    reverse=True)  # sort using malicious tag then AbuseConfi and then Suspicious tag
+
 for i, result in enumerate(sorted_ips):
-    if result['abuseConfidenceScore'] > 25:
+    if result['abuseConfidenceScore'] > 25 or result['Res']['malicious'] > 5:
         print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
-    elif result['abuseConfidenceScore'] > 10:
+    elif result['abuseConfidenceScore'] > 10 or result['Res']['malicious'] > 2 or result['Res']['suspicious'] > 1:
         print(f"{Style.RED} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
-    elif result['abuseConfidenceScore'] > 2:
+    elif result['abuseConfidenceScore'] > 2 or result['Res']['malicious'] > 0 or result['Res']['suspicious'] > 0:
         print(f"{Style.YELLOW} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
     else:
         print(f"{Style.GREEN} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
-'''

@@ -1,5 +1,7 @@
 # Bulk IP Reputation Lookup
 
+- &#x1F4D9; This readme needs updatation
+
 This Python script aims to bulk check IPs reputation using multiple tools, currently focusing on VirusTotal. 
 The script utilizes the VirusTotal API to fetch information about the provided IP addresses. 
 For more information on the VirusTotal API, please refer to the 
