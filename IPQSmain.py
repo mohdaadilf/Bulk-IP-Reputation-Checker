@@ -30,7 +30,7 @@ for ip in ips:
             v = resp["vpn"]
             if res > 25:
                 print(f'{Style.RED_Highlighted}{res}{Style.RESET}')
-            temp = {'ip': ip, 'link': link, 'fraud_score': res, 'isTor': istor, 'recent_abuse':ra,
+            temp = {'IP': ip, 'link': link, 'fraud_score': res, 'isTor': istor, 'recent_abuse':ra,
                     'bot_status': bt, 'is_crawler': ic, 'proxy': p, 'vpn': v}
             all_ips.append(temp)
             # print(f"Result: {json.dumps(temp, indent=2)}") # Printed

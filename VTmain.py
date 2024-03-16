@@ -28,7 +28,7 @@ for ip in ips:
             res = resp["data"]["attributes"]["last_analysis_stats"]
             if resp["data"]["attributes"]["last_analysis_stats"]["malicious"] > 2:
                 print(f'{Style.RED_Highlighted}{res}{Style.RESET}')
-            temp = {'ip': ip, 'link': link, 'tags': tags, 'res': res}
+            temp = {'IP': ip, 'link': link, 'tags': tags, 'res': res}
             all_ips.append(temp)
             # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
             # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")

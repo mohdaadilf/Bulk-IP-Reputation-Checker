@@ -34,7 +34,7 @@ for i, ip in enumerate(ips):
             res_aipdb = resp["data"]["abuseConfidenceScore"]
             tr_aipdb = resp["data"]["totalReports"]
             ndu_aipdb = resp["data"]["numDistinctUsers"]
-            temp_vt = {'ip': ip_aipdb, 'AbuseIPDB': {'abuseConfidenceScore': res_aipdb, 'isTor': istor_aipdb}}
+            temp_vt = {'IP': ip_aipdb, 'AbuseIPDB': {'abuseConfidenceScore': res_aipdb, 'isTor': istor_aipdb}}
             all_ips.append(temp_vt)
             # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
             # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
@@ -123,11 +123,11 @@ sorted_ips = sorted(all_ips, key=lambda x: (x["VT"]["malicious"], x['AbuseIPDB']
 # malicious tag then AbuseConfi and then Suspicious tag
 
 for i, result in enumerate(sorted_ips):
-    if result['AbuseIPDB']['abuseConfidenceScore'] > 25 or result['VT']['malicious'] > 5:
+    if result['AbuseIPDB']['abuseConfidenceScore'] > 25 or result['VT']['malicious'] > 5 or result["IPQS"]['fraud_score'] > 25:
         print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
-    elif result['AbuseIPDB']['abuseConfidenceScore'] > 10 or result['VT']['malicious'] > 2 or result['VT']['suspicious'] > 1:
+    elif result['AbuseIPDB']['abuseConfidenceScore'] > 10 or result['VT']['malicious'] > 2 or result['VT']['suspicious'] > 1 or result["IPQS"]['fraud_score'] > 10:
         print(f"{Style.RED} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
-    elif result['AbuseIPDB']['abuseConfidenceScore'] > 2 or result['VT']['malicious'] > 0 or result['VT']['suspicious'] > 0:
+    elif result['AbuseIPDB']['abuseConfidenceScore'] > 2 or result['VT']['malicious'] > 0 or result['VT']['suspicious'] > 0 or result["IPQS"]['fraud_score'] > 2:
         print(f"{Style.YELLOW} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
     else:
         print(f"{Style.GREEN} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
