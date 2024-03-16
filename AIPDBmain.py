@@ -24,7 +24,7 @@ for ip in ips:
 
             response = requests.request(method='GET', url=url, headers=headers, params=querystring)
             response.raise_for_status()
-            print(f"{response} for {ip}")
+            # print(f"{response} for {ip}")
             # Formatted output
             resp = json.loads(response.text)
             print(f'{json.dumps(resp, indent=4)}')
@@ -38,7 +38,7 @@ for ip in ips:
             usage = resp["data"]["usageType"]
             if res > 25:
                 print(f'{Style.RED_Highlighted}{res}{Style.RESET}')
-            temp = {'ip': ip, 'link': link, 'isTor': istor, 'isWhitelisted':iswhi, 'abuseConfidenceScore': res,
+            temp = {'ip': ip, 'link': link, 'isTor': istor, 'isWhitelisted': iswhi, 'abuseConfidenceScore': res,
                     'totalReports': tr, 'numDistinctUsers': ndu, 'usage': usage}
             all_ips.append(temp)
             # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
@@ -57,7 +57,7 @@ for ip in ips:
         print(f"{Style.RED_Highlighted}Something gone terribly wrong. This line should never run{Style.RESET}")
 
 sorted_ips = sorted(all_ips, key=lambda x: (x['abuseConfidenceScore']), reverse=True)  # sort using
-# malicious tag then suspicious tag
+# abuseConfidenceScore tag
 for i, result in enumerate(sorted_ips):
     if result['abuseConfidenceScore'] > 25:
         print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
