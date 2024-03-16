@@ -1,6 +1,7 @@
 from credentials import aipdbapi, vtapi, ipqsapi
 from common import *
 
+index = 0 # to update the final dict is used. You cannout use i as some ips will be private and that will cause the dict updation to fail.
 for i, ip in enumerate(ips):
     try:
         address = ipaddress.ip_address(ip)
@@ -22,7 +23,8 @@ for i, ip in enumerate(ips):
                 'Accept': 'application/json',
                 'Key': aipdbapi
             }
-            response_vt_aipdb = requests.request(method='GET', url=url_aipdb, headers=headers_aipdb, params=querystring_aipdb)
+            response_vt_aipdb = requests.request(method='GET', url=url_aipdb, headers=headers_aipdb,
+                                                 params=querystring_aipdb)
             response_vt_aipdb.raise_for_status()
             print(f"{response_vt_aipdb} for {ip} on AbuseIPDB")
             # Formatted output
@@ -64,7 +66,7 @@ for i, ip in enumerate(ips):
             tags_vt = resp_vt["data"]["attributes"]["tags"]
             res_vt = resp_vt["data"]["attributes"]["last_analysis_stats"]
             # temp = {'ip': ip_vt, 'link': link_vt, 'tags': tags_vt, 'res': res_vt}
-            all_ips[i].update({'VT': res_vt})
+            all_ips[index].update({'VT': res_vt})
             # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
             # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
         except requests.HTTPError as ex:
@@ -95,13 +97,14 @@ for i, ip in enumerate(ips):
             ic_ipqs = resp_ipqs["is_crawler"]
             p_ipqs = resp_ipqs["proxy"]
             v_ipqs = resp_ipqs["vpn"]
-            if res_ipqs > 25:
+            if res_ipqs > 95:
                 print(f'{Style.RED_Highlighted}{res_ipqs}{Style.RESET}')
             temp_ipqs = {'fraud_score': res_ipqs, 'isTor': istor_ipqs, 'recent_abuse': ra_ipqs, 'bot_status': bt_ipqs,
                          'is_crawler': ic_ipqs, 'proxy': p_ipqs, 'vpn': v_ipqs}
-            all_ips[i].update({'IPQS': temp_ipqs})
+            all_ips[index].update({'IPQS': temp_ipqs})
             # print(f"Result: {json.dumps(temp, indent=2)}") # Printed
             # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
+            index+=1
         except requests.HTTPError as ex:
             # check response_ipqs for a possible message
             print(f"Response for {address}: {Style.YELLOW} {response_ipqs.text}{Style.RESET}")
@@ -123,11 +126,14 @@ sorted_ips = sorted(all_ips, key=lambda x: (x["VT"]["malicious"], x['AbuseIPDB']
 # malicious tag then AbuseConfi and then Suspicious tag
 
 for i, result in enumerate(sorted_ips):
-    if result['AbuseIPDB']['abuseConfidenceScore'] > 25 or result['VT']['malicious'] > 5 or result["IPQS"]['fraud_score'] > 25:
+    if result['AbuseIPDB']['abuseConfidenceScore'] > 25 or result['VT']['malicious'] > 5 or result["IPQS"][
+        'fraud_score'] > 85:
         print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
-    elif result['AbuseIPDB']['abuseConfidenceScore'] > 10 or result['VT']['malicious'] > 2 or result['VT']['suspicious'] > 1 or result["IPQS"]['fraud_score'] > 10:
+    elif result['AbuseIPDB']['abuseConfidenceScore'] > 10 or result['VT']['malicious'] > 2 or result['VT'][
+        'suspicious'] > 1 or result["IPQS"]['fraud_score'] > 80:
         print(f"{Style.RED} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
-    elif result['AbuseIPDB']['abuseConfidenceScore'] > 2 or result['VT']['malicious'] > 0 or result['VT']['suspicious'] > 0 or result["IPQS"]['fraud_score'] > 2:
+    elif result['AbuseIPDB']['abuseConfidenceScore'] > 2 or result['VT']['malicious'] > 0 or result['VT'][
+        'suspicious'] > 0 or result["IPQS"]['fraud_score'] > 50:
         print(f"{Style.YELLOW} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
     else:
         print(f"{Style.GREEN} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
