@@ -7,10 +7,9 @@ For more information on the APIs, please refer to the:
 - [Official AbsueIPDB documentation](https://docs.abuseipdb.com/#introduction)  
 - [Official IPQualityScore documentation](https://www.ipqualityscore.com/documentation/proxy-detection-api/overview)  
 
-
-### Prerequisites    
 > [!NOTE] 
-1. Ensure you have a separate Python file named `credentials.py`, where you need to supply your API keys.
+> ### Prerequisites    
+  1. Ensure you have a separate Python file named `credentials.py`, where you need to supply your API keys.
 Define the API key variable as `vtapi`, `aipdbapi` and `ipqsapi` within this file. Go to the respective tools 
 docs/webpages to get your own api key.
 2. Python 3.10 or later is required to use the `truststore` package.
@@ -22,20 +21,17 @@ I am not responsible for any misuse of this script or its results. Use it respon
 relevant laws and regulations. 
 
 ### Usage 
-
 1. Ensure Python 3.10 or later is installed.
 2. Provide your (VirusTotal) API key in the `credentials.py` file.
 3. Save the IPs to check in `ips.txt`
 4. The script can be run in 2 different ways:  
-> [!TIP]    
-> 
+> [!NOTE]  
    A. You can either run `all.py` to check the IPs against all mentioned tools.   
    B. Or you can run `VTmain.py`, `AIPDBmain.py` or `IPQSmain.py` individually to check the IPs against specific tools.
     Running individual tools will give you some additional information, should you need it.
 
-### Additional Notes 
 > [!IMPORTANT]
-
+> ### Additional Notes
 - The `truststore` package is utilized to inject truststore into the standard library SSL module, ensuring its functionality is used by every library by default. 
 - The script reads IP addresses from a file named `ips.txt` in the same directory. Ensure this file exists and contains the IP addresses you want to check.
 - The sorted list of IPs (according to their result), along with their tags and analysis results, will be printed in the terminal.
