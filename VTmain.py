@@ -34,7 +34,7 @@ for ip in ips:
             # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
         except requests.HTTPError as ex:
             # check response for a possible message
-            print(f"Response for {address}: {Style.YELLOW} {response.text}")
+            print(f"Response for {address}: {Style.YELLOW} {response.text}{Style.RESET}")
             raise ex  # let the caller handle it
         except requests.Timeout:
             # request took too long

@@ -40,7 +40,7 @@ for i, ip in enumerate(ips):
             # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
         except requests.HTTPError as ex:
             # check response_vt for a possible message
-            print(f"Response for {address}: {Style.YELLOW} {response_vt_aipdb.text}")
+            print(f"Response for {address}: {Style.YELLOW} {response_vt_aipdb.text}{Style.RESET}")
             raise ex  # let the caller handle it
         except requests.Timeout:
             # request took too long
@@ -69,7 +69,7 @@ for i, ip in enumerate(ips):
             # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
         except requests.HTTPError as ex:
             # check response_vt for a possible message
-            print(f"Response for {address}: {Style.YELLOW} {response_vt.text}")
+            print(f"Response for {address}: {Style.YELLOW} {response_vt.text}{Style.RESET}")
             raise ex  # let the caller handle it
         except requests.Timeout:
             # request took too long
@@ -104,7 +104,7 @@ for i, ip in enumerate(ips):
             # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
         except requests.HTTPError as ex:
             # check response_ipqs for a possible message
-            print(f"Response for {address}: {Style.YELLOW} {response_ipqs.text}")
+            print(f"Response for {address}: {Style.YELLOW} {response_ipqs.text}{Style.RESET}")
             raise ex  # let the caller handle it
         except requests.Timeout:
             # request took too long
