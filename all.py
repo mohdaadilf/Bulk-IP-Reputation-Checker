@@ -1,125 +1,67 @@
-from credentials import aipdbapi, vtapi, ipqsapi
 from common import *
+from VTmain import vtmain
+from AIPDBmain import aipdbmain
+from IPQSmain import ipqsmain
 
-index = 0 # to update the final dict is used. You cannout use i as some ips will be private and that will cause the dict updation to fail.
+index = 0  # to update the final dict. You cannout use i in the following loop as some ips may be private and
+# that will cause the dict update to fail.
 for i, ip in enumerate(ips):
     try:
         address = ipaddress.ip_address(ip)
     except ValueError:
         # 3. Handle invalid IP address format gracefully
-        print(f"\n{Style.RED}Entered IP '{ip}' is not a valid IP!{Style.RESET}\n")
+        print(f"{Style.RED}Entered IP '{ip}' is not a valid IP!{Style.RESET}")
         continue
 
     if not address.is_private:
         # AbuseIPDB
-        try:
-            days = 90
-            url_aipdb = 'https://api.abuseipdb.com/api/v2/check'
-            querystring_aipdb = {
-                'ipAddress': ip,
-                'maxAgeInDays': days
-            }
-            headers_aipdb = {
-                'Accept': 'application/json',
-                'Key': aipdbapi
-            }
-            response_vt_aipdb = requests.request(method='GET', url=url_aipdb, headers=headers_aipdb,
-                                                 params=querystring_aipdb)
-            response_vt_aipdb.raise_for_status()
-            print(f"{response_vt_aipdb} for {ip} on AbuseIPDB")
-            # Formatted output
-            resp = json.loads(response_vt_aipdb.text)
-            # print(f'{json.dumps(resp, indent=4)}')
-            ip_aipdb = resp["data"]["ipAddress"]
-            link_aipdb = f"https://abuseipdb.com/check/{ip}"
-            istor_aipdb = resp["data"]["isTor"]
-            res_aipdb = resp["data"]["abuseConfidenceScore"]
-            tr_aipdb = resp["data"]["totalReports"]
-            ndu_aipdb = resp["data"]["numDistinctUsers"]
-            temp_vt = {'IP': ip_aipdb, 'AbuseIPDB': {'abuseConfidenceScore': res_aipdb, 'isTor': istor_aipdb}}
-            all_ips.append(temp_vt)
-            # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
-            # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
-        except requests.HTTPError as ex:
-            # check response_vt for a possible message
-            print(f"Response for {address}: {Style.YELLOW} {response_vt_aipdb.text}{Style.RESET}")
-            raise ex  # let the caller handle it
-        except requests.Timeout:
-            # request took too long
-            print("Timeout")
-        # response_vt = requests.get(url, headers=headers)
+        aipdb_response_json = aipdbmain(address)
+        # print(f'{json.dumps(aipdb_response_json, indent=4)}')
+        ip_aipdb = aipdb_response_json["data"]["ipAddress"]
+        istor_aipdb = aipdb_response_json["data"]["isTor"]
+        res_aipdb = aipdb_response_json["data"]["abuseConfidenceScore"]
+        tr_aipdb = aipdb_response_json["data"]["totalReports"]
+        ndu_aipdb = aipdb_response_json["data"]["numDistinctUsers"]
+        temp_aipdb = {'IP': ip, 'AbuseIPDB': {'abuseConfidenceScore': res_aipdb, 'isTor': istor_aipdb}}
+        all_ips.append(temp_aipdb)
+        # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
+        # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
 
         # VirusTotal
-        try:
-            url_vt = f"https://www.virustotal.com/api/v3/ip_addresses/{ip}"
-            headers_vt = {
-                "accept": "application/json",
-                "x-apikey": vtapi
-            }
-            response_vt = requests.get(url_vt, headers=headers_vt, timeout=5)
-            response_vt.raise_for_status()
-            print(f"{response_vt} for {ip} on VT")
-
-            resp_vt = json.loads(response_vt.text)
-            ip_vt = resp_vt["data"]["id"]
-            link_vt = resp_vt["data"]["links"]["self"]
-            tags_vt = resp_vt["data"]["attributes"]["tags"]
-            res_vt = resp_vt["data"]["attributes"]["last_analysis_stats"]
-            # temp = {'ip': ip_vt, 'link': link_vt, 'tags': tags_vt, 'res': res_vt}
-            all_ips[index].update({'VT': res_vt})
-            # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
-            # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
-        except requests.HTTPError as ex:
-            # check response_vt for a possible message
-            print(f"Response for {address}: {Style.YELLOW} {response_vt.text}{Style.RESET}")
-            raise ex  # let the caller handle it
-        except requests.Timeout:
-            # request took too long
-            print("Timeout")
-        # response = requests.get(url, headers=headers)
+        vt_response_json = vtmain(address)
+        ip_vt = vt_response_json["data"]["id"]
+        link_vt = vt_response_json["data"]["links"]["self"]
+        tags_vt = vt_response_json["data"]["attributes"]["tags"]
+        res_vt = vt_response_json["data"]["attributes"]["last_analysis_stats"]
+        # temp = {'ip': ip_vt, 'link': link_vt, 'tags': tags_vt, 'res': res_vt}
+        all_ips[index].update({'VT': res_vt})
+        # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
+        # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
 
         # IPQualityScore:
-        try:
-            url = f'https://ipqualityscore.com/api/json/ip/{ipqsapi}/{ip}'
-
-            response_ipqs = requests.request(method='GET', url=url)
-            response_ipqs.raise_for_status()
-            print(f"{response_ipqs} for {ip} on IPQualityScore")
-            # Formatted output
-            resp_ipqs = json.loads(response_ipqs.text)
-            # print(f'{json.dumps(resp, indent=4)}')
-            ip_ipqs = resp_ipqs["host"]
-            link_ipqs = f"https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/{ip}"
-            istor_ipqs = resp_ipqs["tor"]
-            res_ipqs = resp_ipqs["fraud_score"]
-            ra_ipqs = resp_ipqs["recent_abuse"]
-            bt_ipqs = resp_ipqs["bot_status"]
-            ic_ipqs = resp_ipqs["is_crawler"]
-            p_ipqs = resp_ipqs["proxy"]
-            v_ipqs = resp_ipqs["vpn"]
-            if res_ipqs > 95:
-                print(f'{Style.RED_Highlighted}{res_ipqs}{Style.RESET}')
-            temp_ipqs = {'fraud_score': res_ipqs, 'isTor': istor_ipqs, 'recent_abuse': ra_ipqs, 'bot_status': bt_ipqs,
-                         'is_crawler': ic_ipqs, 'proxy': p_ipqs, 'vpn': v_ipqs}
-            all_ips[index].update({'IPQS': temp_ipqs})
-            # print(f"Result: {json.dumps(temp, indent=2)}") # Printed
-            # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
-            index+=1
-        except requests.HTTPError as ex:
-            # check response_ipqs for a possible message
-            print(f"Response for {address}: {Style.YELLOW} {response_ipqs.text}{Style.RESET}")
-            raise ex  # let the caller handle it
-        except requests.Timeout:
-            # request took too long
-            print("Timeout")
-        # response = requests.get(url, headers=headers)
+        ipqs_response_json = ipqsmain(address)
+        # print(f'{json.dumps(resp, indent=4)}')
+        ip_ipqs = ipqs_response_json["host"]
+        istor_ipqs = ipqs_response_json["tor"]
+        res_ipqs = ipqs_response_json["fraud_score"]
+        ra_ipqs = ipqs_response_json["recent_abuse"]
+        bt_ipqs = ipqs_response_json["bot_status"]
+        ic_ipqs = ipqs_response_json["is_crawler"]
+        p_ipqs = ipqs_response_json["proxy"]
+        v_ipqs = ipqs_response_json["vpn"]
+        temp_ipqs = {'fraud_score': res_ipqs, 'isTor': istor_ipqs, 'recent_abuse': ra_ipqs, 'bot_status': bt_ipqs,
+                     'is_crawler': ic_ipqs, 'proxy': p_ipqs, 'vpn': v_ipqs}
+        all_ips[index].update({'IPQS': temp_ipqs})
+        # print(f"Result: {json.dumps(temp, indent=2)}") # Printed
+        # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
+        index += 1
 
     elif address.is_private:
-        print(f"\n{Style.BLUE}Given IP {address} is Private{Style.RESET}\n")
+        print(f"{Style.BLUE}Given IP {address} is Private{Style.RESET}")
     else:
         print(f"{Style.RED_Highlighted}Something gone terribly wrong. This line should never run{Style.RESET}")
 
-# print(json.dumps(all_ips, indent=3))
+    # print(json.dumps(all_ips, indent=3))
 
 sorted_ips = sorted(all_ips, key=lambda x: (x["VT"]["malicious"], x['AbuseIPDB']['abuseConfidenceScore'],
                                             x["VT"]["suspicious"]), reverse=True)  # sort using

@@ -10,7 +10,7 @@ For more information on the APIs, please refer to the:
 > [!NOTE] 
 > ### Prerequisites    
   1. Ensure you have a separate Python file named `credentials.py`, where you need to supply your API keys.
-Define the API key variable as `vtapi`, `aipdbapi` and `ipqsapi` within this file. Go to the respective tools 
+Define the API key variable as `vt_api`, `aipdb_api` and `ipqs_api` within this file. Go to the respective tools 
 docs/webpages to get your own api key.
 2. Python 3.10 or later is required to use the `truststore` package.
 3. Some IPs to check against
@@ -65,3 +65,8 @@ relevant laws and regulations.
 }
 ```
 Please adjust the script and configurations according to your requirements and ensure compliance with all relevant terms of service.
+
+#### Improvements to be made
+- Failover/Continuation of code even when one Tool fails
+- ASync requests, maybe?!
+- IPQS improvements
