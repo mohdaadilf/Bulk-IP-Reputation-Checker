@@ -27,7 +27,7 @@ with open("ips.txt") as f:
     ips = f.readlines()
 ips = [x.strip() for x in ips]  # remove new line char
 ips = list(set(ips))  # remove duplicates
-print(ips)  # to show the ips
+print(f"Length: {len(ips)}\n{ips}")  # to show the ips
 
 #  check https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml and
 # https://bugs.python.org/issue42937

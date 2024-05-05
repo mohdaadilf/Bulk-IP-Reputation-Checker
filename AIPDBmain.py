@@ -4,7 +4,7 @@ from common import *
 all_aipdb_ips = []
 
 
-def aipdbmain(address):
+def aipdbmain(address, i):
     try:
         aipdb_days = 90
         aipdb_url = 'https://api.abuseipdb.com/api/v2/check' \
@@ -23,7 +23,7 @@ def aipdbmain(address):
         aipdb_response.raise_for_status()
         # print(f"{response} for {ip}")
         # Formatted output
-        print(f"{aipdb_response} for {address} on AIPDB")
+        print(f"IP {i}/{len(ips)} {aipdb_response} for {address} on AIPDB")
         aipdb_response_json = json.loads(aipdb_response.text)
         # print(f'{json.dumps(aipdb_response_json, indent=4)}')
         aipdb_ip = aipdb_response_json["data"]["ipAddress"]
@@ -35,7 +35,7 @@ def aipdbmain(address):
         aipdb_iswhi = aipdb_response_json["data"]["isWhitelisted"]
         aipdb_usage = aipdb_response_json["data"]["usageType"]
         if aipdb_res > 25:
-            print(f'\t{Style.RED_Highlighted}{aipdb_res}{Style.RESET}')
+            print(f'\t{Style.RED_Highlighted}Abuse Confidence Score: {aipdb_res}{Style.RESET}')
         aipdb_temp = {'AIPDB_IP': aipdb_ip, 'AIPDB_link': aipdb_link, 'AIPDB_isTor': aipdb_istor,
                       'AIPDB_isWhitelisted': aipdb_iswhi,
                       'AIPDB_abuseConfidenceScore': aipdb_res, 'AIPDB_totalReports': aipdb_tr,
@@ -46,35 +46,36 @@ def aipdbmain(address):
         # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
     except requests.HTTPError as ex:
         # check response for a possible message
-        print(f"Response for {address}: {Style.YELLOW} {aipdb_response.text}{Style.RESET}")
+        print(f"IP {i}/{len(ips)} Response for {address}: {Style.YELLOW} {aipdb_response.text}{Style.RESET}")
         raise ex  # let the caller handle it
     except requests.Timeout:
         # request took too long
-        print("Timeout")
+        print("IP {i}/{len(ips)} Timeout")
         # response = requests.get(url, headers=headers)
 
 
 if __name__ == "__main__":
     # Code to execute when the file is run directly
     print("Executing directly")
-    for ip in ips:
+    for i, ip in enumerate(ips):
+        i += 1
         try:
             address = ipaddress.ip_address(ip)
         except ValueError:
             # 3. Handle invalid IP address format gracefully
-            print(f"{Style.RED}Entered IP '{ip}' is not a valid IP!{Style.RESET}")
+            print(f"IP {i}/{len(ips)} {Style.RED}Entered IP '{ip}' is not a valid IP!{Style.RESET}")
             continue
         if not address.is_private:
-            response = aipdbmain(address)
-            print(response)
+            response = aipdbmain(address, i+1)
+            print(f"\tEntire output (For Debugging): {response}")
         elif address.is_private:
-            print(f"{Style.BLUE}Given IP {address} is Private{Style.RESET}")
+            print(f"IP {i}/{len(ips)} {Style.BLUE}Given IP {address} is Private{Style.RESET}")
         else:
-            print(f"{Style.RED_Highlighted}Something gone terribly wrong. This line should never run{Style.RESET}")
+            print(f"IP {i}/{len(ips)} {Style.RED_Highlighted}Something gone terribly wrong. This line should never run{Style.RESET}")
 
-    print(f"all vt ips: {all_aipdb_ips}")
     sorted_ips = sorted(all_aipdb_ips, key=lambda x: (x['AIPDB_abuseConfidenceScore']), reverse=True)  # sort using
     # AIPDB_abuseConfidenceScore tag
+    print("\nMain Output:")
     for i, result in enumerate(sorted_ips):
         if result['AIPDB_abuseConfidenceScore'] > 25:
             print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
