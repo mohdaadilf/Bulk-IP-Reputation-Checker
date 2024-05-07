@@ -1,87 +1,87 @@
-from common import *
-from VTmain import vtmain
+# all.py
+import asyncio
+
+import aiohttp
+
 from AIPDBmain import aipdbmain
 from IPQSmain import ipqsmain
+from VTmain import vtmain
+from common import *
 
-index = 0  # to update the final dict. You cannout use i in the following loop as some ips may be private and
-# that will cause the dict update to fail.
-for i, ip in enumerate(ips):
-    i += 1
-    try:
-        address = ipaddress.ip_address(ip)
-    except ValueError:
-        # 3. Handle invalid IP address format gracefully
-        print(f"IP {i}/{len(ips)} {Style.RED}Entered IP '{ip}' is not a valid IP!{Style.RESET}")
-        continue
 
-    if not address.is_private:
-        # AbuseIPDB
-        aipdb_response_json = aipdbmain(address, i)
-        # print(f'{json.dumps(aipdb_response_json, indent=4)}')
-        ip_aipdb = aipdb_response_json["data"]["ipAddress"]
-        istor_aipdb = aipdb_response_json["data"]["isTor"]
-        res_aipdb = aipdb_response_json["data"]["abuseConfidenceScore"]
-        tr_aipdb = aipdb_response_json["data"]["totalReports"]
-        ndu_aipdb = aipdb_response_json["data"]["numDistinctUsers"]
-        temp_aipdb = {'IP': ip, 'AbuseIPDB': {'abuseConfidenceScore': res_aipdb, 'isTor': istor_aipdb}}
-        all_ips.append(temp_aipdb)
-        # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
-        # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
+async def process_ip(address, index, session):
+    # AbuseIPDB
+    aipdb_response_json = await aipdbmain(f'{address}', index)
 
-        # VirusTotal
-        vt_response_json = vtmain(address, i)
-        ip_vt = vt_response_json["data"]["id"]
-        link_vt = vt_response_json["data"]["links"]["self"]
-        tags_vt = vt_response_json["data"]["attributes"]["tags"]
-        res_vt = vt_response_json["data"]["attributes"]["last_analysis_stats"]
-        # temp = {'ip': ip_vt, 'link': link_vt, 'tags': tags_vt, 'res': res_vt}
-        all_ips[index].update({'VT': res_vt})
-        # print(f"IP: {ip}\nTags: {json.dumps(tags, indent=2)}\nResult: {json.dumps(res, indent=3)}") # Printed
-        # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
+    # VirusTotal
+    vt_response_json = await vtmain(f'{address}', index, session)
 
-        # IPQualityScore:
-        ipqs_response_json = ipqsmain(address, i)
-        if ipqs_response_json['success'] is False:
-            ip_ipqs = 0
-            istor_ipqs = res_ipqs = ra_ipqs = bt_ipqs = ic_ipqs = p_ipqs = v_ipqs = None
-        else:
-            # print(f'{json.dumps(resp, indent=4)}')
-            ip_ipqs = ipqs_response_json["host"]
-            istor_ipqs = ipqs_response_json["tor"]
-            res_ipqs = ipqs_response_json["fraud_score"]
-            ra_ipqs = ipqs_response_json["recent_abuse"]
-            bt_ipqs = ipqs_response_json["bot_status"]
-            ic_ipqs = ipqs_response_json["is_crawler"]
-            p_ipqs = ipqs_response_json["proxy"]
-            v_ipqs = ipqs_response_json["vpn"]
-        temp_ipqs = {'fraud_score': res_ipqs, 'isTor': istor_ipqs, 'recent_abuse': ra_ipqs, 'bot_status': bt_ipqs,
-                     'is_crawler': ic_ipqs, 'proxy': p_ipqs, 'vpn': v_ipqs}
-        all_ips[index].update({'IPQS': temp_ipqs})
-        # print(f"Result: {json.dumps(temp, indent=2)}") # Printed
-        # in 'sorted_ips' print(f"Temp:{temp}\n\n") print(f"All_Ips:{json.dumps(all_ips, indent = 3)}")
-        index += 1
+    # IPQualityScore:
+    ipqs_response_json = await ipqsmain(f'{address}', index)
+    if ipqs_response_json['success'] is False:
+        ipqs_ip = f'{address}'
+        # ipqs_res = 0
+        # ipqs_link = ipqs_istor = ipqs_ra = ipqs_bt = ipqs_ic = ipqs_p = ipqs_v = None
+        ipqs_response_json['fraud_score'] = 0
+        ipqs_response_json['tor'] = ipqs_response_json['recent_abuse'] = ipqs_response_json['bot_status'] = \
+            ipqs_response_json['is_crawler'] = ipqs_response_json['proxy'] = ipqs_response_json['vpn'] = None
 
-    elif address.is_private:
-        print(f"IP {i}/{len(ips)} {Style.BLUE}Given IP {address} is Private{Style.RESET}")
-    else:
-        print(
-            f"IP {i}/{len(ips)} {Style.RED_Highlighted}Something gone terribly wrong. This line should never run{Style.RESET}")
+    temp = {
+        'IP': address,
+        'AbuseIPDB': {
+            'abuseConfidenceScore': aipdb_response_json['data']['abuseConfidenceScore'],
+            'isTor': aipdb_response_json['data']['isTor']
+        },
+        'VT': vt_response_json['data']['attributes']['last_analysis_stats'],
+        'IPQS': {
+            'fraud_score': ipqs_response_json['fraud_score'],
+            'isTor': ipqs_response_json['tor'],
+            'recent_abuse': ipqs_response_json['recent_abuse'],
+            'bot_status': ipqs_response_json['bot_status'],
+            'is_crawler': ipqs_response_json['is_crawler'],
+            'proxy': ipqs_response_json['proxy'],
+            'vpn': ipqs_response_json['vpn']
+        }
+    }
+    return temp
 
-    # print(json.dumps(all_ips, indent=3))
 
-sorted_ips = sorted(all_ips, key=lambda x: (x["VT"]["malicious"], x['AbuseIPDB']['abuseConfidenceScore'],
-                                            x["VT"]["suspicious"]), reverse=True)  # sort using
-# malicious tag then AbuseConfi and then Suspicious tag
-print(f"\nMain Output:")
-for i, result in enumerate(sorted_ips):
-    if result['AbuseIPDB']['abuseConfidenceScore'] > 25 or result['VT']['malicious'] > 5 or result["IPQS"][
-        'fraud_score'] > 85:
-        print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
-    elif result['AbuseIPDB']['abuseConfidenceScore'] > 10 or result['VT']['malicious'] > 2 or result['VT'][
-        'suspicious'] > 1 or result["IPQS"]['fraud_score'] > 80:
-        print(f"{Style.RED} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
-    elif result['AbuseIPDB']['abuseConfidenceScore'] > 2 or result['VT']['malicious'] > 0 or result['VT'][
-        'suspicious'] > 0 or result["IPQS"]['fraud_score'] > 50:
-        print(f"{Style.YELLOW} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
-    else:
-        print(f"{Style.GREEN} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
+async def main():
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for i, ip in enumerate(ips, start=1):
+            try:
+                address = ipaddress.ip_address(ip)
+            except ValueError:
+                print(f"IP {i}/{len(ips)} {Style.RED}Entered IP '{ip}' is not a valid IP!{Style.RESET}")
+                continue
+            if not address.is_private:
+                tasks.append(process_ip(f'{address}', i, session))
+            else:
+                print(f"IP {i}/{len(ips)} {Style.BLUE}Given IP {address} is Private{Style.RESET}")
+
+        all_results = await asyncio.gather(*tasks)
+        print(f'ALL RESULTS {all_results}')
+        sorted_results = sorted(all_results, key=lambda x: (
+            x["VT"]["malicious"], x['AbuseIPDB']['abuseConfidenceScore'], x["VT"]["suspicious"]), reverse=True)
+
+        print(f"\nMain Output:")
+        for i, result in enumerate(sorted_results, start=1):
+            if result:
+                abuse_confidence = result['AbuseIPDB']['abuseConfidenceScore']
+                vt_malicious = result['VT']['malicious']
+                ipqs_fraud_score = result['IPQS']['fraud_score']
+
+                if abuse_confidence > 25 or vt_malicious > 5 or ipqs_fraud_score > 85:
+                    print(f"{Style.RED_Highlighted} {i} {json.dumps(result, indent=3)}{Style.RESET}")
+                elif abuse_confidence > 10 or vt_malicious > 2 or result['VT'][
+                    'suspicious'] > 1 or ipqs_fraud_score > 80:
+                    print(f"{Style.RED} {i}: {json.dumps(result, indent=3)}{Style.RESET}")
+                elif abuse_confidence > 2 or vt_malicious > 0 or result['VT'][
+                    'suspicious'] > 0 or ipqs_fraud_score > 50:
+                    print(f"{Style.YELLOW} {i}: {json.dumps(result, indent=3)}{Style.RESET}")
+                else:
+                    print(f"{Style.GREEN} {i}: {json.dumps(result, indent=3)}{Style.RESET}")
+
+
+asyncio.run(main())
