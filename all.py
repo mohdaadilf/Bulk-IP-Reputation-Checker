@@ -19,11 +19,8 @@ async def process_ip(address, index, session):
 
     # VirusTotal
     vt_response_json, vt_status_code = await vtmain(f'{address}', index, session)
-    print(f'{vt_status_code}sc')
-    print(f'vt ress 1 {vt_response_json}')
     vt_false_resp = {}
     if vt_status_code != 200:
-        print("inside")
         vt_false_resp = {
             'data': {
                 'attributes': {
@@ -32,7 +29,7 @@ async def process_ip(address, index, session):
                         "malicious": 0,
                         "suspicious": 0,
                     }}}}
-        vt_response_json = vt_false_resp
+        vt_response_json.update(vt_false_resp)
         print(f'vt res:{vt_response_json}')
 
     # IPQualityScore:

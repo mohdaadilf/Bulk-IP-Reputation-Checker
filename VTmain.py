@@ -25,8 +25,9 @@ async def vtmain(address, i, session):
         async with session.get(vt_url, headers=vt_headers, timeout=5) as response:
             vt_response_json = await response.json()
             print(f"IP {i}/{len(ips)} {Style.RESET}{response.status} {response.reason} for {address} on VT")
-            print(f"{await response.text()} eroor")
+
             if not response.ok:
+                print(f"{await response.text()}")
                 vt_ip = F'{address}'
                 vt_link = vt_tags = None
                 vt_res = {
