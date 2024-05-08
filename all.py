@@ -1,4 +1,8 @@
 # all.py
+import time
+
+start_time = time.time()
+
 import asyncio
 
 import aiohttp
@@ -14,17 +18,31 @@ async def process_ip(address, index, session):
     aipdb_response_json = await aipdbmain(f'{address}', index)
 
     # VirusTotal
-    vt_response_json = await vtmain(f'{address}', index, session)
+    vt_response_json, vt_status_code = await vtmain(f'{address}', index, session)
+    print(f'{vt_status_code}sc')
+    print(f'vt ress 1 {vt_response_json}')
+    vt_false_resp = {}
+    if vt_status_code != 200:
+        print("inside")
+        vt_false_resp = {
+            'data': {
+                'attributes': {
+                    'last_analysis_stats': {
+                        "NOTE": f"{vt_status_code} error! These results cannot be trusted!",
+                        "malicious": 0,
+                        "suspicious": 0,
+                    }}}}
+        vt_response_json = vt_false_resp
+        print(f'vt res:{vt_response_json}')
 
     # IPQualityScore:
     ipqs_response_json = await ipqsmain(f'{address}', index)
     if ipqs_response_json['success'] is False:
         ipqs_ip = f'{address}'
-        # ipqs_res = 0
-        # ipqs_link = ipqs_istor = ipqs_ra = ipqs_bt = ipqs_ic = ipqs_p = ipqs_v = None
         ipqs_response_json['fraud_score'] = 0
         ipqs_response_json['tor'] = ipqs_response_json['recent_abuse'] = ipqs_response_json['bot_status'] = \
-            ipqs_response_json['is_crawler'] = ipqs_response_json['proxy'] = ipqs_response_json['vpn'] = None
+            ipqs_response_json['is_crawler'] = ipqs_response_json['proxy'] = ipqs_response_json['vpn'] = \
+            f'INVALID RESULTS'
 
     temp = {
         'IP': address,
@@ -85,3 +103,6 @@ async def main():
 
 
 asyncio.run(main())
+end_time = time.time()
+execution_time = end_time - start_time
+print(f"Execution time: {execution_time} seconds!")

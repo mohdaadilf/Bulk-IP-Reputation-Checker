@@ -1,3 +1,5 @@
+import time
+start_time_vt = time.time()
 import asyncio
 import ipaddress
 import json
@@ -22,17 +24,27 @@ async def vtmain(address, i, session):
         }
         async with session.get(vt_url, headers=vt_headers, timeout=5) as response:
             vt_response_json = await response.json()
-            # print(await response.text())
-            vt_ip = vt_response_json["data"]["id"]
-            vt_link = vt_response_json["data"]["links"]["self"]
-            vt_tags = vt_response_json["data"]["attributes"]["tags"]
-            vt_res = vt_response_json["data"]["attributes"]["last_analysis_stats"]
-            if vt_res["malicious"] > 2:
-                print(f'\t{Style.RED_Highlighted}Malicious %: {vt_res}{Style.RESET}')
+            print(f"IP {i}/{len(ips)} {Style.RESET}{response.status} {response.reason} for {address} on VT")
+            print(f"{await response.text()} eroor")
+            if not response.ok:
+                vt_ip = F'{address}'
+                vt_link = vt_tags = None
+                vt_res = {
+                    "NOTE": f"{response.reason} error! These results cannot be trusted",
+                    "malicious": 0,
+                    "suspicious": 0,
+                    'Result': 'INVALID RESULT'
+                }
+            elif response.ok:
+                vt_ip = vt_response_json["data"]["id"]
+                vt_link = vt_response_json["data"]["links"]["self"]
+                vt_tags = vt_response_json["data"]["attributes"]["tags"]
+                vt_res = vt_response_json["data"]["attributes"]["last_analysis_stats"]
+                if vt_res["malicious"] > 2:
+                    print(f'\t{Style.RED_Highlighted}Malicious %: {vt_res}{Style.RESET}')
             vt_temp = {'VT_IP': vt_ip, 'Vt_Link': vt_link, 'VT_Tags': vt_tags, 'VT_Res': vt_res}
             all_vt_ips.append(vt_temp)
-            print(f"IP {i}/{len(ips)} {response.status} {response.reason} for {address} on VT")
-            return vt_response_json
+            return vt_response_json, response.status
     except aiohttp.ClientError as ex:
         print(f"IP {i}/{len(ips)} Error on VT for {address}: {Style.YELLOW} {str(ex)}{Style.RESET}")
         return None
@@ -58,7 +70,9 @@ async def main():
                                reverse=True)  # sort using malicious tag then suspicious tag
         print("\nMain Output:")
         for i, result in enumerate(sorted_vt_ips):
-            if result['VT_Res']['malicious'] > 5:
+            if result['VT_Res']['Result'] == 'INVALID RESULT':
+                print(f"{Style.GREY} {i + 1} {json.dumps(result, indent=1)}{Style.RESET}")
+            elif result['VT_Res']['malicious'] > 5:
                 print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
             elif result['VT_Res']['malicious'] > 2 or result['VT_Res']['suspicious'] > 1:
                 print(f"{Style.RED} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
@@ -71,3 +85,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    print(f"Result received within {time.time() - start_time_vt} seconds!")

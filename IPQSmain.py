@@ -1,3 +1,6 @@
+import time
+
+start_time_ipqs = time.time()
 import asyncio
 import ipaddress
 import json
@@ -21,7 +24,7 @@ async def ipqsmain(address, i):
                 if ipqs_response_json['success'] is False:
                     ipqs_ip = f'{address}'
                     ipqs_res = 0
-                    ipqs_link = ipqs_istor = ipqs_ra = ipqs_bt = ipqs_ic = ipqs_p = ipqs_v = None
+                    ipqs_link = ipqs_istor = ipqs_ra = ipqs_bt = ipqs_ic = ipqs_p = ipqs_v = f'INVALID RESULT'
                 else:
                     ipqs_ip = ipqs_response_json["host"]
                     ipqs_link = f"https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/{address}"
@@ -60,14 +63,17 @@ async def main():
         elif address.is_private:
             print(f"IP {i}/{len(ips)} {Style.BLUE}Given IP {address} is Private{Style.RESET}")
         else:
-            print(f"IP {i}/{len(ips)} {Style.RED_Highlighted}Something gone terribly wrong. This line should never run{Style.RESET}")
+            print(
+                f"IP {i}/{len(ips)} {Style.RED_Highlighted}Something gone terribly wrong. This line should never run{Style.RESET}")
 
     await asyncio.gather(*tasks)
 
     sorted_ipqs_ips = sorted(all_ipqs_ips, key=lambda x: (x['IPQS_Fraud_Score']), reverse=True)
     print("\nMain Output:")
     for i, result in enumerate(sorted_ipqs_ips):
-        if result['IPQS_Fraud_Score'] > 25:
+        if result['IPQS_Link'] == 'INVALID RESULT':
+            print(f"{Style.GREY} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
+        elif result['IPQS_Fraud_Score'] > 25:
             print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
         elif result['IPQS_Fraud_Score'] > 10:
             print(f"{Style.RED} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
@@ -79,4 +85,6 @@ async def main():
 
 if __name__ == "__main__":
     print("Executing directly")
+
     asyncio.run(main())
+    print(f"Result received within {time.time() - start_time_ipqs} seconds!")

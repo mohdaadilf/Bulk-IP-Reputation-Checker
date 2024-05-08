@@ -68,4 +68,4 @@ Please adjust the script and configurations according to your requirements and e
 
 #### Improvements to be made
 - Failover/Continuation of code even when one Tool fails
-- ASync requests, maybe?!
+- ASync requests, maybe?! => In progress. Reduced time for 8 IP searches from 20-25 seonds to 4-9 seconds!

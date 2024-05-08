@@ -1,18 +1,12 @@
+import time
+
+start_time_aipdb = time.time()
 import aiohttp
 import asyncio
 import json
 import ipaddress
 from credentials import aipdb_api
 from common import *
-
-# Define color codes
-class Style:
-    RESET = '\033[0m'
-    RED = '\033[31m'
-    RED_Highlighted = '\033[41m\033[97m'
-    YELLOW = '\033[33m'
-    GREEN = '\033[32m'
-    BLUE = '\033[34m'
 
 all_aipdb_ips = []
 
@@ -75,7 +69,8 @@ async def main():
         elif address.is_private:
             print(f"IP {i}/{len(ips)} {Style.BLUE}Given IP {address} is Private{Style.RESET}")
         else:
-            print(f"IP {i}/{len(ips)} {Style.RED_Highlighted}Something gone terribly wrong. This line should never run{Style.RESET}")
+            print(
+                f"IP {i}/{len(ips)} {Style.RED_Highlighted}Something gone terribly wrong. This line should never run{Style.RESET}")
 
     responses = await asyncio.gather(*tasks)
     sorted_ips = sorted(all_aipdb_ips, key=lambda x: (x['AIPDB_abuseConfidenceScore']), reverse=True)
@@ -94,3 +89,4 @@ async def main():
 if __name__ == "__main__":
     print("Executing directly")
     asyncio.run(main())
+    print(f"Result received within {time.time() - start_time_aipdb} seconds!")
