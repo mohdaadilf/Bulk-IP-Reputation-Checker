@@ -12,7 +12,7 @@ def vtmain(address, i):
             "accept": "application/json",
             "x-apikey": vt_api
         }
-        vt_response = requests.get(vt_url, headers=vt_headers, timeout=5)
+        vt_response = requests.get(vt_url, headers=vt_headers, timeout=5, verify=certifi.where())
         vt_response.raise_for_status()
         print(f"IP {i}/{len(ips)} {vt_response} for {address} on VT")
         vt_response_json = json.loads(vt_response.text)

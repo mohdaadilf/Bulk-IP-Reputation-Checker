@@ -7,7 +7,7 @@ all_ipqs_ips = []
 def ipqsmain(address, i):
     try:
         ipqs_url = f'https://ipqualityscore.com/api/json/ip/{ipqs_api}/{address}'
-        ipqs_response = requests.request(method='GET', url=ipqs_url)
+        ipqs_response = requests.request(method='GET', url=ipqs_url, verify=certifi.where())
         ipqs_response.raise_for_status()
         print(f"IP {i}/{len(ips)} {ipqs_response} for {address} on IPQS")
         # Formatted output

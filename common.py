@@ -1,8 +1,10 @@
 import requests
 import ipaddress
 import json
-import truststore
+import certifi
 import os
+
+# Certifi used because truststore doesn't seem to be working.
 
 os.system("color")  # enables ANSI escape sequences to color output; check
 
@@ -18,7 +20,7 @@ class Style:
     RESET = '\033[0m'
 
 
-truststore.inject_into_ssl()  # Inject truststore into the standard library ssl module so the functionality is used
+# truststore.inject_into_ssl()  # Inject truststore into the standard library ssl module so the functionality is used
 # by every library by default.
 
 all_ips = []  # to have the sorted-final list
@@ -31,5 +33,5 @@ print(f"Length: {len(ips)}\n{ips}")  # to show the ips
 
 #  check https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml and
 # https://bugs.python.org/issue42937
-# Is a check on the non routable IPs such as 100.64.0.0/10 required?
+# Is a check on the non-routeable IPs such as 100.64.0.0/10 required?
 # what about 192.0.0.0/24 etc. Improvements to be made~

@@ -19,7 +19,7 @@ def aipdbmain(address, i):
         }
 
         aipdb_response = requests.request(method='GET', url=aipdb_url, headers=aipdb_headers,
-                                          params=aipdb_querystring)
+                                          params=aipdb_querystring, verify=certifi.where())
         aipdb_response.raise_for_status()
         # print(f"{response} for {ip}")
         # Formatted output
