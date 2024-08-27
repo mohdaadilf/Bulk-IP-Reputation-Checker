@@ -67,5 +67,6 @@ relevant laws and regulations.
 Please adjust the script and configurations according to your requirements and ensure compliance with all relevant terms of service.
 
 #### Improvements to be made
-- Failover/Continuation of code even when one Tool fails
-- ASync requests, maybe?! => In progress. Reduced time for 8 IP searches from 20-25 seonds to 4-9 seconds!
+~~- Failover/Continuation of code even when one Tool fails~~
+~~- ASync requests, maybe?! => In progress. Reduced time for 8 IP searches from 20-25 seonds to 4-9 seconds!~~
+- Add more tools such as AlientVault
