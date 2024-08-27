@@ -12,7 +12,7 @@ For more information on the APIs, please refer to the:
   1. Ensure you have a separate Python file named `credentials.py`, where you need to supply your API keys.
 Define the API key variable as `vt_api`, `aipdb_api` and `ipqs_api` within this file. Go to the respective tools 
 docs/webpages to get your own api key.
-2. Python 3.10 or later is required to use the `truststore` package.
+2. Python 3.10 or later is recommended.
 3. Some IPs to check against
 
 ### Disclaimer 
@@ -32,7 +32,7 @@ relevant laws and regulations.
 
 > [!IMPORTANT]
 > ### Additional Notes
-- The `truststore` package is utilized to inject truststore into the standard library SSL module, ensuring its functionality is used by every library by default. 
+- Certifi is used to eliminate any certificate issues.
 - The script reads IP addresses from a file named `ips.txt` in the same directory. Ensure this file exists and contains the IP addresses you want to check.
 - The sorted list of IPs (according to their result), along with their tags and analysis results, will be printed in the terminal.
 

@@ -15,7 +15,15 @@ from common import *
 
 async def process_ip(address, index, session):
     # AbuseIPDB
-    aipdb_response_json = await aipdbmain(f'{address}', index)
+    aipdb_response_json, aipdb_status_code = await aipdbmain(f'{address}', index)
+    aipdb_false_resp = {}
+    if aipdb_status_code != 200:
+        aipdb_response_json = {
+            'data': {
+                'aipdb_ip': f'{address}',
+                'abuseConfidenceScore': -1,
+                'isTor': f'INVALID RESULT - {aipdb_response_json['errors'][0]['detail']}'
+            }}
 
     # VirusTotal
     vt_response_json, vt_status_code = await vtmain(f'{address}', index, session)
@@ -25,7 +33,7 @@ async def process_ip(address, index, session):
             'data': {
                 'attributes': {
                     'last_analysis_stats': {
-                        "NOTE": f"{vt_status_code} error! These results cannot be trusted!",
+                        "NOTE": f"{vt_response_json['error']['message']} error! These results cannot be trusted!",
                         "malicious": 0,
                         "suspicious": 0,
                     }}}}
@@ -36,10 +44,10 @@ async def process_ip(address, index, session):
     ipqs_response_json = await ipqsmain(f'{address}', index)
     if ipqs_response_json['success'] is False:
         ipqs_ip = f'{address}'
-        ipqs_response_json['fraud_score'] = 0
+        ipqs_response_json['fraud_score'] = -1
         ipqs_response_json['tor'] = ipqs_response_json['recent_abuse'] = ipqs_response_json['bot_status'] = \
             ipqs_response_json['is_crawler'] = ipqs_response_json['proxy'] = ipqs_response_json['vpn'] = \
-            f'INVALID RESULTS'
+            f'INVALID RESULTS - {ipqs_response_json['message']}'
 
     temp = {
         'IP': address,
@@ -87,7 +95,9 @@ async def main():
                 vt_malicious = result['VT']['malicious']
                 ipqs_fraud_score = result['IPQS']['fraud_score']
 
-                if abuse_confidence > 25 or vt_malicious > 5 or ipqs_fraud_score > 85:
+                if abuse_confidence == vt_malicious == ipqs_fraud_score == -1:
+                    print(f"{Style.GREY} {i} {json.dumps(result, indent=3)}{Style.RESET}")
+                elif abuse_confidence > 25 or vt_malicious > 5 or ipqs_fraud_score > 85:
                     print(f"{Style.RED_Highlighted} {i} {json.dumps(result, indent=3)}{Style.RESET}")
                 elif abuse_confidence > 10 or vt_malicious > 2 or result['VT'][
                     'suspicious'] > 1 or ipqs_fraud_score > 80:

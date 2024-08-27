@@ -19,12 +19,13 @@ async def ipqsmain(address, i):
         async with aiohttp.ClientSession() as session:
             async with session.get(ipqs_url) as response:
                 ipqs_response_json = await response.json()
-                print(f"IP {i}/{len(ips)} {response.status} {response.reason} for {address} on IPQS")
+                # print(f"IP {i}/{len(ips)} {response.status} {response.reason} for {address} on IPQS")
+                # print(ipqs_response_json)
                 # print(f"response start {ipqs_response_json} responseend")
                 if ipqs_response_json['success'] is False:
                     ipqs_ip = f'{address}'
-                    ipqs_res = 0
-                    ipqs_link = ipqs_istor = ipqs_ra = ipqs_bt = ipqs_ic = ipqs_p = ipqs_v = f'INVALID RESULT'
+                    ipqs_res = -1
+                    ipqs_link = ipqs_istor = ipqs_ra = ipqs_bt = ipqs_ic = ipqs_p = ipqs_v = f'INVALID RESULT - {ipqs_response_json['message']}'
                 else:
                     ipqs_ip = ipqs_response_json["host"]
                     ipqs_link = f"https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/{address}"
@@ -71,7 +72,7 @@ async def main():
     sorted_ipqs_ips = sorted(all_ipqs_ips, key=lambda x: (x['IPQS_Fraud_Score']), reverse=True)
     print("\nMain Output:")
     for i, result in enumerate(sorted_ipqs_ips):
-        if result['IPQS_Link'] == 'INVALID RESULT':
+        if result['IPQS_Fraud_Score'] == -1:
             print(f"{Style.GREY} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
         elif result['IPQS_Fraud_Score'] > 25:
             print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")

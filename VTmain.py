@@ -25,15 +25,15 @@ async def vtmain(address, i, session):
         async with session.get(vt_url, headers=vt_headers, timeout=5) as response:
             vt_response_json = await response.json()
             print(f"IP {i}/{len(ips)} {Style.RESET}{response.status} {response.reason} for {address} on VT")
-
+            # print(vt_response_json)
             if not response.ok:
                 print(f"{await response.text()}")
                 vt_ip = F'{address}'
                 vt_link = vt_tags = None
                 vt_res = {
-                    "NOTE": f"{response.reason} error! These results cannot be trusted",
-                    "malicious": 0,
-                    "suspicious": 0,
+                    "NOTE": f"{vt_response_json['error']['message']} error! These results cannot be trusted",
+                    "malicious": -1,
+                    "suspicious": -1,
                     'Result': 'INVALID RESULT'
                 }
             elif response.ok:
@@ -71,7 +71,7 @@ async def main():
                                reverse=True)  # sort using malicious tag then suspicious tag
         print("\nMain Output:")
         for i, result in enumerate(sorted_vt_ips):
-            if result['VT_Res']['Result'] == 'INVALID RESULT':
+            if result['VT_Res']['malicious'] == -1:
                 print(f"{Style.GREY} {i + 1} {json.dumps(result, indent=1)}{Style.RESET}")
             elif result['VT_Res']['malicious'] > 5:
                 print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
