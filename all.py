@@ -22,7 +22,7 @@ async def process_ip(address, index, session):
             'data': {
                 'aipdb_ip': f'{address}',
                 'abuseConfidenceScore': -1,
-                'isTor': f'INVALID RESULT - {aipdb_response_json['errors'][0]['detail']}'
+                'isTor': f"INVALID RESULT - {aipdb_response_json['errors'][0]['detail']}"
             }}
 
     # VirusTotal
@@ -47,7 +47,7 @@ async def process_ip(address, index, session):
         ipqs_response_json['fraud_score'] = -1
         ipqs_response_json['tor'] = ipqs_response_json['recent_abuse'] = ipqs_response_json['bot_status'] = \
             ipqs_response_json['is_crawler'] = ipqs_response_json['proxy'] = ipqs_response_json['vpn'] = \
-            f'INVALID RESULTS - {ipqs_response_json['message']}'
+            f"INVALID RESULTS - {ipqs_response_json['message']}"
 
     temp = {
         'IP': address,

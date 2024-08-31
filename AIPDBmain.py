@@ -33,7 +33,7 @@ async def aipdbmain(address, i):
                 if not response.ok:
                     aipdb_ip = f'{address}'
                     aipdb_res = -1
-                    aipdb_link = aipdb_istor = aipdb_tr = aipdb_ndu = aipdb_iswhi = aipdb_usage = f'INVALID RESULT - {aipdb_response['errors'][0]['detail']}'
+                    aipdb_link = aipdb_istor = aipdb_tr = aipdb_ndu = aipdb_iswhi = aipdb_usage = f"INVALID RESULT - {aipdb_response['errors'][0]['detail']}"
 
                 elif response.ok:
                     aipdb_ip = aipdb_response["data"]["ipAddress"]

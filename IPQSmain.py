@@ -25,7 +25,7 @@ async def ipqsmain(address, i):
                 if ipqs_response_json['success'] is False:
                     ipqs_ip = f'{address}'
                     ipqs_res = -1
-                    ipqs_link = ipqs_istor = ipqs_ra = ipqs_bt = ipqs_ic = ipqs_p = ipqs_v = f'INVALID RESULT - {ipqs_response_json['message']}'
+                    ipqs_link = ipqs_istor = ipqs_ra = ipqs_bt = ipqs_ic = ipqs_p = ipqs_v = f"INVALID RESULT - {ipqs_response_json['message']}"
                 else:
                     ipqs_ip = ipqs_response_json["host"]
                     ipqs_link = f"https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/{address}"
