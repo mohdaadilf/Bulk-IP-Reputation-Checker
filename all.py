@@ -5,17 +5,18 @@ start_time = time.time()
 
 import asyncio
 
-import aiohttp
+import aiohttp, ipaddress, json
 
 from AIPDBmain import aipdbmain
 from IPQSmain import ipqsmain
 from VTmain import vtmain
-from common import *
+from OTXAmain import otxamain
+from common import Style, ips, timeout_set
 
 
 async def process_ip(address, index, session):
     # AbuseIPDB
-    aipdb_response_json, aipdb_status_code = await aipdbmain(f'{address}', index)
+    aipdb_response_json, aipdb_status_code = await aipdbmain(f'{address}', index, session)
     aipdb_false_resp = {}
     if aipdb_status_code != 200:
         aipdb_response_json = {
@@ -38,16 +39,23 @@ async def process_ip(address, index, session):
                         "suspicious": 0,
                     }}}}
         vt_response_json.update(vt_false_resp)
-        print(f'vt res:{vt_response_json}')
+        # print(f'vt res:{vt_response_json}')
 
     # IPQualityScore:
-    ipqs_response_json = await ipqsmain(f'{address}', index)
+    ipqs_response_json = await ipqsmain(f'{address}', index, session)
     if ipqs_response_json['success'] is False:
         ipqs_ip = f'{address}'
         ipqs_response_json['fraud_score'] = -1
         ipqs_response_json['tor'] = ipqs_response_json['recent_abuse'] = ipqs_response_json['bot_status'] = \
             ipqs_response_json['is_crawler'] = ipqs_response_json['proxy'] = ipqs_response_json['vpn'] = \
             f"INVALID RESULTS - {ipqs_response_json['message']}"
+
+    otxa_response_json, otxa_response_code = await otxamain(f'{address}', index, session)
+    if otxa_response_code != 200:
+        otxa_response_json['reputation'] = -1
+        otxa_response_json['indicator'] = f"{address}"
+        otxa_response_json["false_positive"] = otxa_response_json["validation"] = \
+            f"INVALID RESULT - {otxa_response_json}"
 
     temp = {
         'IP': address,
@@ -64,13 +72,19 @@ async def process_ip(address, index, session):
             'is_crawler': ipqs_response_json['is_crawler'],
             'proxy': ipqs_response_json['proxy'],
             'vpn': ipqs_response_json['vpn']
+        },
+        'OTA-A': {
+            'reputation': otxa_response_json["reputation"],
+            'validation': otxa_response_json["validation"],
+            'fp': otxa_response_json["false_positive"]
         }
+
     }
     return temp
 
 
 async def main():
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout_set)) as session:
         tasks = []
         for i, ip in enumerate(ips, start=1):
             try:

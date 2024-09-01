@@ -6,12 +6,11 @@ import asyncio
 import json
 import ipaddress
 from credentials import aipdb_api
-from common import *
+from common import Style, ips, timeout_set
 
 all_aipdb_ips = []
 
-
-async def aipdbmain(address, i):
+async def aipdbmain(address, i, session):
     try:
         aipdb_days = 90
         aipdb_url = 'https://api.abuseipdb.com/api/v2/check'
@@ -24,60 +23,70 @@ async def aipdbmain(address, i):
             'Key': aipdb_api
         }
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(aipdb_url, params=aipdb_querystring, headers=aipdb_headers) as response:
-                aipdb_response = await response.json()
-                print(f"IP {i}/{len(ips)} {Style.RESET}{response.status} {response.reason} for {address} on AIPDB")
-                # print(await response.text())
-                # print(aipdb_response)
-                if not response.ok:
-                    aipdb_ip = f'{address}'
-                    aipdb_res = -1
-                    aipdb_link = aipdb_istor = aipdb_tr = aipdb_ndu = aipdb_iswhi = aipdb_usage = f"INVALID RESULT - {aipdb_response['errors'][0]['detail']}"
+        async with session.get(aipdb_url, params=aipdb_querystring, headers=aipdb_headers) as response:
+            aipdb_response_json = await response.json()
+            print(f"IP {i}/{len(ips)} {Style.RESET}{response.status} {response.reason} for {address} on AIPDB")
+            # print(await response.text())
+            # print(aipdb_response_json)
+            if not response.ok:
+                aipdb_ip = f'{address}'
+                aipdb_res = -1
+                aipdb_link = aipdb_istor = aipdb_tr = aipdb_ndu = aipdb_iswhi = aipdb_usage = f"INVALID RESULT - {aipdb_response_json['errors'][0]['detail']}"
 
-                elif response.ok:
-                    aipdb_ip = aipdb_response["data"]["ipAddress"]
-                    aipdb_link = f"https://abuseipdb.com/check/{address}"
-                    aipdb_istor = aipdb_response["data"]["isTor"]
-                    aipdb_res = aipdb_response["data"]["abuseConfidenceScore"]
-                    aipdb_tr = aipdb_response["data"]["totalReports"]
-                    aipdb_ndu = aipdb_response["data"]["numDistinctUsers"]
-                    aipdb_iswhi = aipdb_response["data"]["isWhitelisted"]
-                    aipdb_usage = aipdb_response["data"]["usageType"]
-                if aipdb_res > 25:
-                    print(f'\t{Style.RED_Highlighted}Abuse Confidence Score: {aipdb_res}{Style.RESET}')
-                aipdb_temp = {'AIPDB_IP': aipdb_ip, 'AIPDB_link': aipdb_link, 'AIPDB_isTor': aipdb_istor,
-                              'AIPDB_isWhitelisted': aipdb_iswhi,
-                              'AIPDB_abuseConfidenceScore': aipdb_res, 'AIPDB_totalReports': aipdb_tr,
-                              'AIPDB_numDistinctUsers': aipdb_ndu, 'AIPDB_usage': aipdb_usage}
-                all_aipdb_ips.append(aipdb_temp)
-                return aipdb_response, response.status
+            elif response.ok:
+                aipdb_ip = aipdb_response_json["data"]["ipAddress"]
+                aipdb_link = f"https://abuseipdb.com/check/{address}"
+                aipdb_istor = aipdb_response_json["data"]["isTor"]
+                aipdb_res = aipdb_response_json["data"]["abuseConfidenceScore"]
+                aipdb_tr = aipdb_response_json["data"]["totalReports"]
+                aipdb_ndu = aipdb_response_json["data"]["numDistinctUsers"]
+                aipdb_iswhi = aipdb_response_json["data"]["isWhitelisted"]
+                aipdb_usage = aipdb_response_json["data"]["usageType"]
+            if aipdb_res > 25:
+                print(f'\t{Style.RED_Highlighted}Abuse Confidence Score: {aipdb_res}{Style.RESET}')
+            aipdb_temp = {'AIPDB_IP': aipdb_ip, 'AIPDB_link': aipdb_link, 'AIPDB_isTor': aipdb_istor,
+                          'AIPDB_isWhitelisted': aipdb_iswhi,
+                          'AIPDB_abuseConfidenceScore': aipdb_res, 'AIPDB_totalReports': aipdb_tr,
+                          'AIPDB_numDistinctUsers': aipdb_ndu, 'AIPDB_usage': aipdb_usage}
+            all_aipdb_ips.append(aipdb_temp)
+            return aipdb_response_json, response.status
 
     except aiohttp.ClientError as ex:
         print(f"IP {i}/{len(ips)} Error for {address}: {Style.YELLOW}{ex} on AIPDB {Style.RESET}")
     except asyncio.TimeoutError:
         print(f"IP {i}/{len(ips)} Timeout")
+        print(f"Request to {address} timed out after {timeout_set} seconds")
+        aipdb_response_json = {
+        aipdb_ip : f'{address}',
+        aipdb_res : -1,
+        aipdb_link : f"Request to {address} timed out after {timeout_set} seconds"}
+        all_aipdb_ips.append(aipdb_response_json)
+        return aipdb_response_json, 0
 
 
-async def main():
+async def main(timeout_value=10):
+    global timeout_set
+    timeout_set = timeout_value
     tasks = []
-    for i, ip in enumerate(ips):
-        i += 1
-        try:
-            address = ipaddress.ip_address(ip)
-        except ValueError:
-            print(f"IP {i}/{len(ips)} {Style.RED}Entered IP '{ip}' is not a valid IP!{Style.RESET}")
-            continue
-        if not address.is_private:
-            task = asyncio.create_task(aipdbmain(f'{address}', i))
-            tasks.append(task)
-        elif address.is_private:
-            print(f"IP {i}/{len(ips)} {Style.BLUE}Given IP {address} is Private{Style.RESET}")
-        else:
-            print(
-                f"IP {i}/{len(ips)} {Style.RED_Highlighted}Something gone terribly wrong. This line should never run {Style.RESET}")
+    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout_set)) as session:
+        for i, ip in enumerate(ips):
+            i += 1
+            try:
+                address = ipaddress.ip_address(ip)
+            except ValueError:
+                print(f"IP {i}/{len(ips)} {Style.RED}Entered IP '{ip}' is not a valid IP!{Style.RESET}")
+                continue
+            if not address.is_private:
+                task = asyncio.create_task(aipdbmain(f'{address}', i, session))
+                tasks.append(task)
+            elif address.is_private:
+                print(f"IP {i}/{len(ips)} {Style.BLUE}Given IP {address} is Private{Style.RESET}")
+            else:
+                print(
+                    f"IP {i}/{len(ips)} {Style.RED_Highlighted}Something gone terribly wrong. This line should never run {Style.RESET}")
 
-    responses = await asyncio.gather(*tasks)
+        responses = await asyncio.gather(*tasks)
+
     sorted_ips = sorted(all_aipdb_ips, key=lambda x: (x['AIPDB_abuseConfidenceScore']), reverse=True)
     print("\nMain Output:")
     for i, result in enumerate(sorted_ips):

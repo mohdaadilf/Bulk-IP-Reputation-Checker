@@ -7,13 +7,12 @@ import json
 import aiohttp
 from aiohttp import ClientSession
 
-from common import Style, truststore, ips
+from common import Style, truststore, ips, timeout_set
 from credentials import vt_api
 
 truststore.inject_into_ssl()
 
 all_vt_ips = []
-
 
 async def vtmain(address, i, session):
     try:
@@ -22,7 +21,7 @@ async def vtmain(address, i, session):
             "accept": "application/json",
             "x-apikey": vt_api
         }
-        async with session.get(vt_url, headers=vt_headers, timeout=5) as response:
+        async with session.get(vt_url, headers=vt_headers) as response:
             vt_response_json = await response.json()
             print(f"IP {i}/{len(ips)} {Style.RESET}{response.status} {response.reason} for {address} on VT")
             # print(vt_response_json)
@@ -46,13 +45,26 @@ async def vtmain(address, i, session):
             vt_temp = {'VT_IP': vt_ip, 'Vt_Link': vt_link, 'VT_Tags': vt_tags, 'VT_Res': vt_res}
             all_vt_ips.append(vt_temp)
             return vt_response_json, response.status
+
+    except asyncio.TimeoutError:
+        print(f"Request to {address} timed out after {timeout_set} seconds on VT")
+        vt_response_json = {'IP': f"{address}", 'vt_res': {
+                    "NOTE": f"{vt_response_json['error']['message']} error! These results cannot be trusted",
+                    "malicious": -1,
+                    "suspicious": -1,
+                    'Result': 'INVALID RESULT'
+                },
+                      "vt_tags": f"INVALID RESULT - Request to {address} timed out after {timeout_set} seconds on VT"}
+
+        all_vt_ips.append(vt_response_json)
+        return vt_response_json, 0
     except aiohttp.ClientError as ex:
         print(f"IP {i}/{len(ips)} Error on VT for {address}: {Style.YELLOW} {str(ex)}{Style.RESET}")
         return None
 
 
 async def main():
-    async with ClientSession() as session:
+    async with ClientSession(timeout=aiohttp.ClientTimeout(total=timeout_set)) as session:
         tasks = []
         for i, ip in enumerate(ips, start=1):
             try:
