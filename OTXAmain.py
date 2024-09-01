@@ -1,6 +1,6 @@
 import time
 
-start_time_ipqs = time.time()
+start_time_otxa = time.time()
 import asyncio
 import ipaddress
 import json
@@ -10,28 +10,31 @@ import aiohttp
 from common import Style, ips
 from credentials import otxa_api
 
-all_ipqs_ips = []
+all_otxa_ips = []
 
 
 async def otxamain(address, i):
     try:
         otxa_url = f'https://otx.alienvault.com/api/v1/indicators/IPv4/{address}/general'
-        async with aiohttp.ClientSession() as session:
+        async with (aiohttp.ClientSession() as session):
             async with session.get(otxa_url) as response:
-                ipqs_response_json = await response.json()
-                # print(f"IP {i}/{len(ips)} {response.status} {response.reason} for {address} on IPQS")
-                # print(ipqs_response_json)
-                print(f"response start {json.dumps(ipqs_response_json, indent=3)} responseend")
-                if ipqs_response_json['success'] is False:
-                  invalid_res  = f"INVALID RESULT - {ipqs_response_json['message']}"
+                otxa_response_json = await response.json()
+                # print(f"IP {i}/{len(ips)} {response.status} {response.reason} for {address} on otxa")
+                # print(otxa_response_json)
+                #print(f"response start {json.dumps(otxa_response_json, indent=3)} responseend")
+                if not response.ok:
+                  otxa_response_json['reputation'] = -1
+                  otxa_response_json['indicator'] = f"{address}"
+                  otxa_response_json["false_positive"]= otxa_response_json["validation"] = f"INVALID RESULT - {otxa_response_json}"
                 else:
-                    if None:
+                    if otxa_response_json["reputation"] > 50:
                         print(f'\t{Style.RED_Highlighted}Fraud Score: {Style.RESET}')
-                temp = {'test':'test'}
-                all_ipqs_ips.append(temp)
-                return ipqs_response_json
+                temp = {'ip': otxa_response_json['indicator'], 'reputation': otxa_response_json["reputation"], 'validation' : otxa_response_json["validation"],
+                        'fp': otxa_response_json["false_positive"]}
+                all_otxa_ips.append(temp)
+                return otxa_response_json
     except aiohttp.ClientError as ex:
-        print(f"IP {i}/{len(ips)} Error for {address} on IPQS: {ex}")
+        print(f"IP {i}/{len(ips)} Error for {address} on OTXAlienVault: {ex}")
 
 
 async def main():
@@ -54,16 +57,16 @@ async def main():
 
     await asyncio.gather(*tasks)
 
-    sorted_ipqs_ips = sorted(all_ipqs_ips, key=lambda x: (x['IPQS_Fraud_Score']), reverse=True)
+    sorted_otxa_ips = sorted(all_otxa_ips, key=lambda x: (x['reputation']), reverse=True)
     print("\nMain Output:")
-    for i, result in enumerate(sorted_ipqs_ips):
-        if result[''] == -1:
+    for i, result in enumerate(sorted_otxa_ips):
+        if result['reputation'] == -1:
             print(f"{Style.GREY} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
-        elif result[''] > 25:
+        elif result['reputation'] > 25:
             print(f"{Style.RED_Highlighted} {i + 1} {json.dumps(result, indent=3)}{Style.RESET}")
-        elif result[''] > 10:
+        elif result['reputation'] > 10:
             print(f"{Style.RED} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
-        elif result[''] > 2:
+        elif result['reputation'] > 2:
             print(f"{Style.YELLOW} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
         else:
             print(f"{Style.GREEN} {i + 1}: {json.dumps(result, indent=3)}{Style.RESET}")
@@ -73,5 +76,5 @@ if __name__ == "__main__":
     print("Executing directly")
 
     asyncio.run(main())
-    print(f"Result received within {time.time() - start_time_ipqs} seconds!")
+    print(f"Result received within {time.time() - start_time_otxa} seconds!")
 
