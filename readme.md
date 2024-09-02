@@ -13,6 +13,7 @@ For more information on the APIs, please refer to the:
   1. Ensure you have a separate Python file named `credentials.py`, where you need to supply your API keys.
 Define the API key variable as `vt_api`, `aipdb_api` and `ipqs_api` within this file. Go to the respective tools 
 docs/webpages to get your own api key (As of now OTXAlienVault doesn't need an API Key).
+     2. You may also rename `credential.py.temp` to `credential.py` and edit the file as needed. `Credential.py` is already in `gitignore` as well.
 2. Python 3.10 or later is recommended.
 3. Some IPs to check against
 
@@ -30,7 +31,7 @@ relevant laws and regulations.
    A. You can either run `all.py` to check the IPs against all mentioned tools.   
    B. Or you can run `VTmain.py`, `AIPDBmain.py` or `IPQSmain.py` individually to check the IPs against specific tools.
     Running individual tools will give you some additional information, should you need it.   
-> C. When running through the CLI you can set a custom timeout value. Default is 10 seconds.
+   C. When running through the CLI you can set a custom timeout value. Default is 10 seconds.
 
 > [!IMPORTANT]
 > ### Additional Notes

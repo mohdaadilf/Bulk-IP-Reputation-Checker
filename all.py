@@ -3,9 +3,7 @@ import time
 
 start_time = time.time()
 
-import asyncio
-
-import aiohttp, ipaddress, json
+import asyncio, aiohttp, ipaddress, json
 
 from AIPDBmain import aipdbmain
 from IPQSmain import ipqsmain
@@ -99,7 +97,7 @@ async def main():
                 print(f"IP {i}/{len(ips)} {Style.BLUE}Given IP {address} is Private{Style.RESET}")
 
         all_results = await asyncio.gather(*tasks)
-        print(f'ALL RESULTS {all_results}')
+        # print(f'ALL RESULTS {all_results}')
         sorted_results = sorted(all_results, key=lambda x: (
             x["VT"]["malicious"], x['AbuseIPDB']['abuseConfidenceScore'], x["VT"]["suspicious"]), reverse=True)
 
