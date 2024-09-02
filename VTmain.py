@@ -1,4 +1,5 @@
 import time
+
 start_time_vt = time.time()
 import asyncio
 import ipaddress
@@ -13,6 +14,7 @@ from credentials import vt_api
 truststore.inject_into_ssl()
 
 all_vt_ips = []
+
 
 async def vtmain(address, i, session):
     try:
@@ -48,13 +50,15 @@ async def vtmain(address, i, session):
 
     except asyncio.TimeoutError:
         print(f"Request to {address} timed out after {timeout_set} seconds on VT")
-        vt_response_json = {'IP': f"{address}", 'vt_res': {
-                    "NOTE": f"{vt_response_json['error']['message']} error! These results cannot be trusted",
-                    "malicious": -1,
-                    "suspicious": -1,
-                    'Result': 'INVALID RESULT'
-                },
-                      "vt_tags": f"INVALID RESULT - Request to {address} timed out after {timeout_set} seconds on VT"}
+        vt_response_json = {'IP': f"{address}",
+                            'error': {
+                                'message': f" Request to {address} timed out after {timeout_set} seconds!"
+                                           f"These results cannot be trusted. Try increasing timeout value",
+                            },
+                            "VT_Res": {
+                            "malicious": -1,
+                            "suspicious": -1
+                            }}
 
         all_vt_ips.append(vt_response_json)
         return vt_response_json, 0

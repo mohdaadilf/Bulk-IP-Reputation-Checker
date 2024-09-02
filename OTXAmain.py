@@ -19,7 +19,7 @@ async def otxamain(address, i, session):
             # print(address)
             # print(await response.text())
             # print(response.status)
-            print(f"IP {i}/{len(ips)} {response.status} {response.reason} for {address} on otxa")
+            print(f"IP {i}/{len(ips)} {response.status} {response.reason} for {address} on OTX-A")
             # print(otxa_response_json)
             #print(f"response start {json.dumps(otxa_response_json, indent=3)} responseend")
             if not response.ok:
@@ -39,7 +39,7 @@ async def otxamain(address, i, session):
     except asyncio.TimeoutError:
         print(f"Request to {address} timed out after {timeout_set} seconds")
         otxa_response_json = {'IP': f"{address}", 'reputation': -1,
-                              "validation": f"INVALID RESULT - Request to {address} timed out after {timeout_set} seconds"}
+                              "validation": f"INVALID RESULT - Request to {address} timed out after {timeout_set} seconds. Try increasing timeout value."}
         all_otxa_ips.append(otxa_response_json)
         return otxa_response_json, 0
     except aiohttp.ClientError as ex:

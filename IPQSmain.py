@@ -43,11 +43,14 @@ async def ipqsmain(address, i, session):
                     'IPQS_bot_status': ipqs_bt, 'IPQS_is_crawler': ipqs_ic, 'IPQS_proxy': ipqs_p,
                     'IPQS_vpn': ipqs_v}
             all_ipqs_ips.append(temp)
-            return ipqs_response_json
+            return ipqs_response_json, response.status
     except asyncio.TimeoutError:
         print(f"Request to {address} timed out after {timeout_set }seconds on IPQS")
-        ipqs_response_json = {'IP': f"{address}", 'ipqs_res': -1, 'ipqs_istor':
-            f"INVALID RESULT - Request to {address} timed out after {timeout_set} seconds on IPQS"}
+        ipqs_response_json = {'IP': f"{address}", 'IPQS_Fraud_Score': -1,
+                              'success': False,
+                              'message': 'Invalid Result',
+                              'ipqs_istor':
+            f"INVALID RESULT - Request to {address} timed out after {timeout_set} seconds on IPQS. Try increasing timeout value"}
 
         all_ipqs_ips.append(ipqs_response_json)
         return ipqs_response_json, 0

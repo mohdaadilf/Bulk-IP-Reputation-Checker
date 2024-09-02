@@ -57,16 +57,16 @@ async def aipdbmain(address, i, session):
         print(f"IP {i}/{len(ips)} Timeout")
         print(f"Request to {address} timed out after {timeout_set} seconds")
         aipdb_response_json = {
-        aipdb_ip : f'{address}',
-        aipdb_res : -1,
-        aipdb_link : f"Request to {address} timed out after {timeout_set} seconds"}
+        'errors': [{'detail': f"Request to {address} timed out after {timeout_set} seconds. Try increasing timeout value."}],
+        'aipdb_ip' : f'{address}',
+        'aipdb_res' : -1,
+        'AIPDB_abuseConfidenceScore': -1,
+        'aipdb_link' : f"Request to {address} timed out after {timeout_set} seconds. Try increasing timeout value."}
         all_aipdb_ips.append(aipdb_response_json)
         return aipdb_response_json, 0
 
 
-async def main(timeout_value=10):
-    global timeout_set
-    timeout_set = timeout_value
+async def main():
     tasks = []
     async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout_set)) as session:
         for i, ip in enumerate(ips):

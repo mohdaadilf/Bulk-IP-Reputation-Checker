@@ -35,15 +35,15 @@ async def process_ip(address, index, session):
                 'attributes': {
                     'last_analysis_stats': {
                         "NOTE": f"{vt_response_json['error']['message']} error! These results cannot be trusted!",
-                        "malicious": 0,
-                        "suspicious": 0,
+                        "malicious": -1,
+                        "suspicious": -1,
                     }}}}
         vt_response_json.update(vt_false_resp)
         # print(f'vt res:{vt_response_json}')
 
     # IPQualityScore:
-    ipqs_response_json = await ipqsmain(f'{address}', index, session)
-    if ipqs_response_json['success'] is False:
+    ipqs_response_json, ipqs_status_code = await ipqsmain(f'{address}', index, session)
+    if not ipqs_response_json['success']:
         ipqs_ip = f'{address}'
         ipqs_response_json['fraud_score'] = -1
         ipqs_response_json['tor'] = ipqs_response_json['recent_abuse'] = ipqs_response_json['bot_status'] = \
@@ -55,7 +55,7 @@ async def process_ip(address, index, session):
         otxa_response_json['reputation'] = -1
         otxa_response_json['indicator'] = f"{address}"
         otxa_response_json["false_positive"] = otxa_response_json["validation"] = \
-            f"INVALID RESULT - {otxa_response_json}"
+            f"INVALID RESULT - {otxa_response_json["validation"]}"
 
     temp = {
         'IP': address,
@@ -73,10 +73,10 @@ async def process_ip(address, index, session):
             'proxy': ipqs_response_json['proxy'],
             'vpn': ipqs_response_json['vpn']
         },
-        'OTA-A': {
+        'OTX-A': {
             'reputation': otxa_response_json["reputation"],
             'validation': otxa_response_json["validation"],
-            'fp': otxa_response_json["false_positive"]
+            'FP': otxa_response_json["false_positive"]
         }
 
     }
