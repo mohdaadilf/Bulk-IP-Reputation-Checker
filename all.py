@@ -17,7 +17,6 @@ from common import Style, ips, timeout_set
 async def process_ip(address, index, session):
     # AbuseIPDB
     aipdb_response_json, aipdb_status_code = await aipdbmain(f'{address}', index, session)
-    aipdb_false_resp = {}
     if aipdb_status_code != 200:
         aipdb_response_json = {
             'data': {
@@ -42,7 +41,7 @@ async def process_ip(address, index, session):
         # print(f'vt res:{vt_response_json}')
 
     # IPQualityScore:
-    ipqs_response_json, ipqs_status_code = await ipqsmain(f'{address}', index, session)
+    ipqs_response_json = await ipqsmain(f'{address}', index, session)
     if not ipqs_response_json['success']:
         ipqs_ip = f'{address}'
         ipqs_response_json['fraud_score'] = -1
