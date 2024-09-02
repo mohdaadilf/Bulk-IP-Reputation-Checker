@@ -54,7 +54,7 @@ async def process_ip(address, index, session):
         otxa_response_json['reputation'] = -1
         otxa_response_json['indicator'] = f"{address}"
         otxa_response_json["false_positive"] = otxa_response_json["validation"] = \
-            f"INVALID RESULT - {otxa_response_json["validation"]}"
+            f'INVALID RESULT - {otxa_response_json["validation"]}'
 
     temp = {
         'IP': address,
