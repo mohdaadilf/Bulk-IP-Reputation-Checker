@@ -48,9 +48,9 @@ async def ipqsmain(address, i, session):
         print(f"Request to {address} timed out after {timeout_set }seconds on IPQS")
         ipqs_response_json = {'IP': f"{address}", 'IPQS_Fraud_Score': -1,
                               'success': False,
-                              'message': 'Invalid Result',
+                              'message': f"INVALID RESULT - Request to {address} timed out after {timeout_set} seconds on IPQS. Try increasing timeout value",
                               'ipqs_istor':
-            f"INVALID RESULT - Request to {address} timed out after {timeout_set} seconds on IPQS. Try increasing timeout value"}
+                                  f"INVALID RESULT - Request to {address} timed out after {timeout_set} seconds on IPQS. Try increasing timeout value."}
 
         all_ipqs_ips.append(ipqs_response_json)
         return ipqs_response_json

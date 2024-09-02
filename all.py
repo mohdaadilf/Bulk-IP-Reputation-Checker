@@ -49,6 +49,8 @@ async def process_ip(address, index, session):
             ipqs_response_json['is_crawler'] = ipqs_response_json['proxy'] = ipqs_response_json['vpn'] = \
             f"INVALID RESULTS - {ipqs_response_json['message']}"
 
+
+    #OTX-AlienVault
     otxa_response_json, otxa_response_code = await otxamain(f'{address}', index, session)
     if otxa_response_code != 200:
         otxa_response_json['reputation'] = -1

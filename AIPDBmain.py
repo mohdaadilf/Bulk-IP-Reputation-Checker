@@ -59,9 +59,9 @@ async def aipdbmain(address, i, session):
         aipdb_response_json = {
         'errors': [{'detail': f"Request to {address} timed out after {timeout_set} seconds. Try increasing timeout value."}],
         'aipdb_ip' : f'{address}',
-        'aipdb_res' : -1,
         'AIPDB_abuseConfidenceScore': -1,
         'aipdb_link' : f"Request to {address} timed out after {timeout_set} seconds. Try increasing timeout value."}
+
         all_aipdb_ips.append(aipdb_response_json)
         return aipdb_response_json, 0
 
